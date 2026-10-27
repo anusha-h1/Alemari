@@ -1,0 +1,106 @@
+:root {
+  --frame: #1c252c;
+  --forest: var(--frame);
+  --deep: #172027;
+  --ink: #26323a;
+  --muted: #68747c;
+  --sage: #eae0d5;
+  --cream: #f8f9fa;
+  --paper: #ffffff;
+  --sand: #eae0d5;
+  --terra: #9d7457;
+  --line: rgba(28, 37, 44, .13);
+  --action-accent: #b3634c;
+  --action-hover: color-mix(in srgb, var(--action-accent) 84%, #1c252c);
+  --action-wash: color-mix(in srgb, var(--action-accent) 10%, #f8f9fa);
+  --shadow: 0 18px 54px rgba(28, 37, 44, .12);
+}
+
+html { background: var(--cream); }
+html { scroll-padding-top: 112px; }
+body, .alemari-app { background: var(--cream); color: var(--frame); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline-color: var(--action-accent); }
+
+.site-nav {
+  color: var(--cream);
+  background: rgba(28, 37, 44, .97);
+  border-bottom-color: rgba(255, 255, 255, .1);
+  box-shadow: 0 8px 25px rgba(28, 37, 44, .08);
+}
+.brand-symbol { color: var(--cream); }
+.brand-word small { color: #c7c5c1; }
+.nav-links button { color: rgba(248, 249, 250, .74); }
+.nav-links button:after { background: var(--action-accent); }
+.nav-links button:hover, .nav-links .nav-link-active { color: #fff; }
+.nav-actions .nav-favorite-shortcut { color: rgba(248, 249, 250, .76); }
+.nav-actions .nav-favorite-shortcut:hover, .nav-actions .nav-favorite-on { color: #fff; }
+.mobile-menu-button { color: var(--cream); }
+.nav-plan-button, .button-dark, .button-terracotta,
+.hero-search button, .hero-quick-planner button, .planner-teaser-copy>button,
+.footer-action>button, .closing-content>button, .chat-input-row button,
+.surprise-no-match-content>button {
+  background: var(--action-accent);
+  border-color: var(--action-accent);
+  color: #fff;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.nav-plan-button:hover, .button-dark:hover:not(:disabled), .button-terracotta:hover:not(:disabled),
+.hero-search button:hover, .hero-quick-planner button:hover, .planner-teaser-copy>button:hover,
+.footer-action>button:hover, .closing-content>button:hover, .chat-input-row button:hover,
+.surprise-no-match-content>button:hover {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+  box-shadow: 0 7px 20px color-mix(in srgb, var(--action-accent) 22%, transparent);
+}
+.button-outline { border-color: color-mix(in srgb, var(--action-accent) 38%, transparent); }
+.button-outline:hover { background: var(--action-wash); border-color: var(--action-accent); }
+.nav-links .nav-link-active:after { background: var(--action-accent); }
+
+.experience-tile { border-radius: 3px; }
+.experience-rail { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+#discover { scroll-margin-top: 112px; }
+.experience-tile-selected { box-shadow: inset 0 0 0 2px var(--action-accent), 0 10px 28px rgba(28, 37, 44, .15); }
+.experience-tile-selected .experience-icon { background: var(--action-accent); border-color: var(--action-accent); }
+.interest-card.interest-selected>i { background: var(--action-accent); border-color: var(--action-accent); color: #fff; }
+.category-chips button.category-chip-active,
+.category-chips button:hover { color: var(--frame); border-color: var(--action-accent); background: var(--action-wash); }
+.category-chips button.category-chip-active { box-shadow: inset 0 -2px 0 var(--action-accent); }
+.destination-card { border-color: rgba(28, 37, 44, .09); border-radius: 3px; }
+.destination-card-selected { outline-color: var(--action-accent); }
+.destination-card:hover { box-shadow: 0 16px 38px rgba(28, 37, 44, .14); }
+.icon-button.is-active { color: var(--action-accent); border-color: color-mix(in srgb, var(--action-accent) 35%, white); background: var(--action-wash); }
+.visited-ribbon { background: var(--action-accent); }
+.map-filter-active, .map-action-icon.is-on { background: var(--action-accent); border-color: var(--action-accent); color: #fff; }
+.map-filter-active:hover, .map-action-icon.is-on:hover { background: var(--action-hover); }
+
+.ticker-band { background: var(--frame); }
+.stories-section, .profile-section { background: #f0ece7; }
+.planner-teaser { background: #eee8e1; }
+.planner-teaser-mark i { background: var(--action-accent); }
+.site-footer { background: var(--frame); }
+.experience-heading { border-color: rgba(28, 37, 44, .16); }
+.destination-card, .calendar-card, .memory-card, .itinerary-day, .chat-panel, .modal-panel {
+  box-shadow: 0 8px 26px rgba(28, 37, 44, .055);
+}
+.chat-fab { background: var(--action-accent); border-color: var(--action-accent); }
+.chat-fab:hover, .chat-fab-open { background: var(--action-hover); border-color: var(--action-hover); }
+.chat-fab-pulse { border-color: color-mix(in srgb, var(--action-accent) 38%, transparent); }
+.chat-message-user p, .chat-message-user>span { background: var(--action-accent); }
+.chat-message-user p { color: #fff; }
+.toast-message { background: var(--frame); }
+.toast-message>svg { color: var(--action-accent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .button, .nav-plan-button, .experience-tile, .destination-card, .icon-button,
+  .map-filter, .category-chips button { transition-duration: .24s; }
+}
+
+@media (max-width: 660px) {
+  .nav-links { background: rgba(28, 37, 44, .99); }
+  .nav-links button { color: rgba(248, 249, 250, .82); border-bottom-color: rgba(255, 255, 255, .12); }
+  .experience-rail { grid-template-columns: repeat(9, 124px); }
+}
+
+@media (min-width: 661px) and (max-width: 1180px) {
+  .experience-rail { grid-template-columns: repeat(9, 139px); }
+}
