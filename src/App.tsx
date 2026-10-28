@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, BookOpen, Bookmark, CalendarDays, Check,
-  Compass, Flower2, Footprints, Heart, Image as ImageIcon, MapPin, Menu, Mountain, Navigation,
-  Plus, Quote, Search, Sparkles, Star, Trees, Waves, Wind, X,
+  Baby, Compass, ExternalLink, Flower2, Footprints, Heart, Hotel, Image as ImageIcon, MapPin, Menu, Mountain, Navigation,
+  Plus, Quote, Search, ShieldCheck, Sparkles, Star, Trees, Utensils, Waves, Wind, X,
 } from 'lucide-react';
 import { addDays, format } from 'date-fns';
 import type { Category, Destination, PlannerPreferences, TravelMemory } from './types';
 import { categories } from './types';
 import { destinations, destinationById } from './data/destinations';
+import { districtSearchUrl, karnatakaDistricts, tripPackages } from './data/travelGuides';
 import { useTravelData } from './hooks/useTravelData';
 import { KarnatakaMap } from './components/KarnatakaMap';
 import { DestinationDetail } from './components/DestinationDetail';
@@ -22,6 +23,7 @@ import { PhotoCredits } from './components/PhotoCredits';
 import { BrandMark, DestinationCard, DestinationImage, PrimaryButton, SectionHeading } from './components/ui';
 import './styles/global.css';
 import './styles/palette.css';
+import './styles/travel-guides.css';
 
 const navItems = [
   ['discover', 'Discover places'], ['map', 'Karnataka map'], ['memories', 'My memories'], ['calendar', 'Travel journal'], ['assistant', 'Travel buddy'],
@@ -135,7 +137,7 @@ function App() {
     const matchesQuery = !query || [destination.name, destination.kannada, destination.region, destination.district, destination.category, ...destination.tags].filter(Boolean).join(' ').toLowerCase().includes(query.toLowerCase());
     const matchesCategory = categoryFilter === 'All experiences' || destination.category === categoryFilter || (categoryFilter === 'Weekend Getaways' ? destination.tags.includes('weekend') : destination.tags.includes(categoryFilter.toLowerCase()));
     const matchesRegion = regionFilter === 'All regions' || destination.region === regionFilter || destination.district === regionFilter;
-    const matchesDistrict = districtFilter === 'All districts' || destination.district === districtFilter;
+    const matchesDistrict = districtFilter === 'All districts' || destination.district === districtFilter || districtFilter === 'Bengaluru South' && destination.district.startsWith('Bengaluru South') || districtFilter === 'Ramanagara' && destination.district.startsWith('Bengaluru South');
     const matchesBudget = budgetFilter === 'Any budget' || (budgetFilter === 'Under ₹3,000' ? destination.budgetMin < 3000 : budgetFilter === '₹3,000–₹6,000' ? destination.budgetMin >= 3000 && destination.budgetMin <= 6000 : budgetFilter === '₹6,000–₹10,000' ? destination.budgetMin >= 6000 && destination.budgetMin <= 10000 : destination.budgetMin > 10000);
     return matchesQuery && matchesCategory && matchesRegion && matchesDistrict && matchesBudget && (!favoritesOnly || store.preferences.favorites.includes(destination.id));
   }), [query, categoryFilter, regionFilter, districtFilter, budgetFilter, favoritesOnly, store.preferences.favorites]);
@@ -148,7 +150,8 @@ function App() {
   const memoryLeaders = store.memories.reduce<Record<string, number>>((counts, memory) => ({ ...counts, [memory.destinationId]: (counts[memory.destinationId] ?? 0) + 1 }), {});
   const favouriteDestination = destinations.find((destination) => destination.id === store.preferences.favorites[0]) ?? destinations.find((destination) => destination.id === Object.entries(memoryLeaders).sort((a, b) => b[1] - a[1])[0]?.[0]);
   const districtsCount = new Set(store.preferences.visited.map((id) => destinationById(id)?.district).filter(Boolean)).size;
-  const catalogueDistrictCount = new Set(destinations.map((destination) => destination.district)).size;
+  const catalogueDistrictCount = karnatakaDistricts.length;
+  const selectedDistrictPlaces = districtFilter === 'All districts' ? [] : destinations.filter((destination) => destination.district === districtFilter || districtFilter === 'Bengaluru South' && destination.district.startsWith('Bengaluru South') || districtFilter === 'Ramanagara' && destination.district.startsWith('Bengaluru South'));
   const actionAccent = categoryFilter === 'All experiences' ? '#B3634C' : actionAccents[categoryFilter as Category] ?? '#B3634C';
 
   const openDestination = (id: string) => {
@@ -168,6 +171,19 @@ function App() {
     setPlannerDefaults(next); syncPlannerPreferences(next);
     setTripTarget(id ?? defaults?.destinationId ?? '');
     setPlannerOpen(true); setDetailDestination(null);
+  };
+  const planPackage = (focus: PlannerPreferences['tripFocus'], district?: string, interests?: string[]) => {
+    const startingPlace = district ? destinations.find((destination) => destination.district === district || district === 'Bengaluru South' && destination.district.startsWith('Bengaluru South')) : undefined;
+    const next: PlannerPreferences = {
+      ...store.preferences.planner,
+      destinationId: startingPlace?.id ?? 'surprise',
+      tripFocus: focus,
+      travellingWithChildren: focus === 'Family with kids',
+      interests: (interests ?? []).filter((interest): interest is Category => categories.includes(interest as Category)),
+      availableDays: Math.max(store.preferences.planner.availableDays, 2),
+    };
+    next.endDate = format(addDays(new Date(`${next.startDate}T12:00:00`), next.availableDays - 1), 'yyyy-MM-dd');
+    setPlannerDefaults(next); syncPlannerPreferences(next); setTripTarget(startingPlace?.id ?? ''); setPlannerOpen(true);
   };
   const addMemory = (date = format(new Date(), 'yyyy-MM-dd'), destinationId?: string) => {
     setMemoryDate(date);
@@ -253,13 +269,15 @@ function App() {
         <div className="section-top-row"><SectionHeading eyebrow="A LAND OF MANY WORLDS" title="ಕರ್ನಾಟಕದ ಸೌಂದರ್ಯವನ್ನು ಅನ್ವೇಷಿಸಿ" subtitle="From misty mountains to ancient kingdoms and peaceful beaches, find the places that speak to your soul." /><div className="discover-side-note"><span>01 — {destinations.length.toString().padStart(2, '0')}</span><p>{catalogueDistrictCount} districts · {destinations.length} places<br />to begin a story.</p></div></div>
         <div className="experience-heading"><span className="eyebrow">CHOOSE YOUR KIND OF DAY</span><p>Where does your mind want to wander?</p></div>
         <div className="experience-rail">{experienceTiles.map((tile) => { const Icon = tile.icon; const img = destinations.find((destination) => destination.id === tile.image); return <button key={tile.category} className={`experience-tile ${categoryFilter === tile.category ? 'experience-tile-selected' : ''}`} onClick={() => { setCategoryFilter(categoryFilter === tile.category ? 'All experiences' : tile.category); setFavoritesOnly(false); }} aria-pressed={categoryFilter === tile.category} style={{ backgroundImage: `linear-gradient(180deg, transparent 18%, rgba(15,35,28,.75)), url('${img?.image}')` }}><span className="experience-icon"><Icon size={17} /></span><strong>{tile.category}</strong><small>{tile.subtitle}</small></button>; })}</div>
+        <div className="package-planner-block"><div className="package-planner-heading"><span className="eyebrow">TRIPS THAT FIT YOUR GROUP</span><h3>Choose a route style. We’ll shape the days.</h3><p>Start with a Karnataka region, a mix of experiences, or who’s travelling.</p></div><div className="package-grid">{tripPackages.map((pack) => { const Icon = pack.icon === 'south' ? Mountain : pack.icon === 'north' ? Compass : pack.icon === 'coast' ? Waves : pack.icon === 'mix' ? Sparkles : pack.icon === 'kids' ? Baby : ShieldCheck; return <article className={`package-card package-card-${pack.icon}`} key={pack.focus}><span className="package-icon"><Icon size={18} /></span><span className="eyebrow">{pack.icon === 'safety' ? 'TRAVEL TOGETHER' : pack.icon === 'kids' ? 'FAMILY DAYS' : 'KARNATAKA ROUTE'}</span><h4>{pack.title}</h4><p>{pack.summary}</p><button onClick={() => planPackage(pack.focus, pack.district, pack.interests)}>Build this trip <ArrowUpRight size={15} /></button></article>; })}</div><div className="women-safety-card"><div><span className="package-icon"><ShieldCheck size={18} /></span><div><strong>Women’s group safety checklist</strong><p>Share the route and check-in times with a trusted contact; agree a meeting point; keep phones charged and offline maps ready; use registered transport and check local access before remote treks. These steps support a plan but cannot guarantee safety.</p></div></div><div className="safety-helplines"><a href="tel:112"><strong>112</strong><small>Emergency</small></a><a href="tel:181"><strong>181</strong><small>Women Helpline</small></a><a href="https://112.gov.in/" target="_blank" rel="noreferrer">Emergency response info <ExternalLink size={13} /></a></div></div></div>
         <div className="destination-explore-toolbar"><div><span className="eyebrow">A GOOD PLACE TO START</span><h3>{favoritesOnly ? 'Places you’ve kept close' : categoryFilter === 'All experiences' ? 'Find your kind of somewhere.' : categoryFilter}</h3></div>
           <div className="destination-filters"><label className="discover-search"><Search size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a place" aria-label="Search places" />{query && <button onClick={() => setQuery('')} aria-label="Clear search"><X size={14} /></button>}</label>
             <select value={regionFilter} onChange={(event) => setRegionFilter(event.target.value)} aria-label="Filter by region"><option>All regions</option>{[...new Set(destinations.map((destination) => destination.region))].map((region) => <option key={region}>{region}</option>)}</select>
-            <select value={districtFilter} onChange={(event) => setDistrictFilter(event.target.value)} aria-label="Filter by district"><option>All districts</option>{[...new Set(destinations.map((destination) => destination.district))].sort((a, b) => a.localeCompare(b)).map((district) => <option key={district}>{district}</option>)}</select>
+            <select value={districtFilter} onChange={(event) => setDistrictFilter(event.target.value)} aria-label="Filter by district"><option>All districts</option>{karnatakaDistricts.map((district) => <option key={district}>{district}</option>)}</select>
             <select value={budgetFilter} onChange={(event) => setBudgetFilter(event.target.value)} aria-label="Filter by approximate budget"><option>Any budget</option><option>Under ₹3,000</option><option>₹3,000–₹6,000</option><option>₹6,000–₹10,000</option><option>Above ₹10,000</option></select>
           </div>
         </div>
+        {districtFilter !== 'All districts' && <section className="district-explorer" aria-label={`${districtFilter} district guide`}><div className="district-explorer-copy"><span className="eyebrow"><MapPin size={13} /> DISTRICT FIELD GUIDE</span><h3>Explore {districtFilter}</h3><p>{selectedDistrictPlaces.length ? `${selectedDistrictPlaces.length} curated places across ${new Set(selectedDistrictPlaces.map((place) => place.category)).size} kinds of experience.` : 'We’re growing the curated place list for this district. Use these live map searches to discover current options nearby.'}</p><div className="district-category-chips">{[...new Set(selectedDistrictPlaces.map((place) => place.category))].map((category) => <span key={category}>{category}</span>)}</div><div className="district-place-links">{selectedDistrictPlaces.slice(0, 6).map((place) => <button key={place.id} onClick={() => openDestination(place.id)}>{place.name} <ArrowUpRight size={13} /></button>)}</div></div><div className="district-local-links"><span className="eyebrow">PLAN AROUND YOUR STAY</span><a href={districtSearchUrl('hotels', districtFilter)} target="_blank" rel="noreferrer"><Hotel size={17} /><span><b>Hotels & homestays</b><small>See current nearby listings</small></span><ExternalLink size={13} /></a><a href={districtSearchUrl('restaurants', districtFilter)} target="_blank" rel="noreferrer"><Utensils size={17} /><span><b>Restaurants & local food</b><small>Find meals and local eateries</small></span><ExternalLink size={13} /></a><a href={districtSearchUrl('things to do', districtFilter)} target="_blank" rel="noreferrer"><MapPin size={17} /><span><b>Nearby places & tour guides</b><small>Explore current local options</small></span><ExternalLink size={13} /></a><a href={districtSearchUrl('tour packages', districtFilter)} target="_blank" rel="noreferrer"><Compass size={17} /><span><b>Local tour packages</b><small>Compare operators for this area</small></span><ExternalLink size={13} /></a><button className="district-plan-button" onClick={() => planPackage('Any of Karnataka', districtFilter, ['Heritage & Architecture', 'Wildlife & Nature'])}>Plan a trip here <ArrowUpRight size={14} /></button></div></section>}
         <div className="filter-summary"><div className="category-chips"><button className={categoryFilter === 'All experiences' ? 'category-chip-active' : ''} onClick={() => setCategoryFilter('All experiences')}>All places <span>{destinations.length}</span></button>{categories.map((category) => <button key={category} className={categoryFilter === category ? 'category-chip-active' : ''} onClick={() => setCategoryFilter(category)}>{category}</button>)}</div><span>{visibleDestinations.length} places to discover</span></div>
         <motion.div className="destination-grid" layout>{visibleDestinations.map((destination) => <DestinationCard key={destination.id} destination={destination} favorite={store.preferences.favorites.includes(destination.id)} visited={store.preferences.visited.includes(destination.id)} selected={selectedId === destination.id} onFavorite={() => store.toggleFavorite(destination.id)} onVisited={() => { store.toggleVisited(destination.id); flash(store.preferences.visited.includes(destination.id) ? `${destination.name} removed from visited places.` : `${destination.name} marked as visited.`); }} onExplore={() => openDestination(destination.id)} onAddTrip={() => addToTrip(destination.id)} />)}</motion.div>
         {visibleDestinations.length === 0 && <div className="no-results"><Compass size={26} /><h3>No paths for that search.</h3><p>Try another place, district, or budget.</p><button className="text-action" onClick={() => { setQuery(''); setCategoryFilter('All experiences'); setRegionFilter('All regions'); setDistrictFilter('All districts'); setBudgetFilter('Any budget'); setFavoritesOnly(false); }}>Clear filters <ArrowRight size={14} /></button></div>}

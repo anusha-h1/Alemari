@@ -38,7 +38,7 @@ export const defaultPreferences: LocalPreferences = {
   planner: {
     startingCity: 'Bengaluru', destinationId: 'hampi', startDate: format(today, 'yyyy-MM-dd'), endDate: format(addDays(today, 1), 'yyyy-MM-dd'),
     travellers: 2, availableDays: 2, interests: ['Heritage & Architecture'], budget: 6000, style: 'Budget-friendly', pace: 'Balanced',
-    transport: 'Public transport', accommodation: 'Guesthouse',
+    transport: 'Public transport', accommodation: 'Guesthouse', tripFocus: 'Any of Karnataka', travellingWithChildren: false,
   },
 };
 

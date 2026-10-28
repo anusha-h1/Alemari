@@ -381,15 +381,15 @@
   },
   {
     "id": "dharmasthala",
-    "name": "Dharmasthala",
-    "file": "/images/destinations/districts/dharmasthala.jpg",
-    "title": "File:Sri Manjunatha Swamy Temple 6, Dharmasthala 03.jpg",
-    "sourcePage": "https://commons.wikimedia.org/wiki/File:Sri_Manjunatha_Swamy_Temple_6%2C_Dharmasthala_03.jpg",
+    "name": "Dharmasthala temple",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Sri_Manjunatha_Swamy_Temple%2C_Dharmasthala%2C_Karnataka_06.jpg?width=1400",
+    "title": "Sri Manjunatha Swamy Temple, Dharmasthala, Karnataka 06.jpg",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Sri_Manjunatha_Swamy_Temple,_Dharmasthala,_Karnataka_06.jpg",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "artist": "A.Murali",
     "credit": "Wikimedia Commons",
-    "description": "Photograph of Dharmasthala, Karnataka."
+    "description": "Temple exterior in Dharmasthala."
   },
   {
     "id": "kunduvada-lake",
@@ -534,5 +534,99 @@
     "artist": "Mahesh d k",
     "credit": "Wikimedia Commons",
     "description": "Photograph of Yadgir Fort, Karnataka."
+  },
+  {
+    "id": "gadag-zoo",
+    "artist": "Zoo Authority of Karnataka",
+    "credit": "Zoo Authority of Karnataka",
+    "license": "Official zoo image",
+    "title": "Binkadakatti Zoo tiger image",
+    "sourcePage": "https://gadag.nic.in/en/tourist-place/gadag-zoo/",
+    "name": "Binkadakatti Zoo",
+    "file": "https://www.zoosofkarnataka.com/assets/img/detailPage/tiger.jpg",
+    "description": "Wildlife image from the official zoo website."
+  },
+  {
+    "id": "kappatagudda",
+    "artist": "Prajavani",
+    "credit": "Prajavani",
+    "license": "Source article",
+    "title": "Kappatagudda Wind Farm Ridge",
+    "sourcePage": "https://www.prajavani.net/leisure/trekking/travelogue-kappatagudda-a-place-of-biodiversity-sahyadri-in-north-karnataka-3372859",
+    "name": "Kappatagudda",
+    "file": "https://media.assettype.com/prajavani%2F2025-06-28%2Fpt6mivyf%2Ffile818e4vhyhsz1g61yb1yn.jpg?auto=format%2Ccompress&fit=max&q=70&w=1200",
+    "description": "Kappatagudda hill range and wind turbines."
+  },
+  {
+    "id": "trikuteshwara-temple",
+    "artist": "Lpp3535",
+    "credit": "Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Trikuteshwara Temple Gadag.jpg",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Trikuteshwara_Temple_Gadag.jpg",
+    "name": "Trikuteshwara Temple",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Trikuteshwara_Temple_Gadag.jpg?width=1400",
+    "description": "Trikuteshwara Temple in Gadag."
+  },
+  {
+    "id": "magadi-bird-sanctuary",
+    "artist": "Samad Kottur",
+    "credit": "Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Bar-headed Geese in Magadi lake by Samad Kottur.jpg",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bar-headed_Geese_in_Magadi_lake_by_Samad_Kottur.jpg",
+    "name": "Magadi Bird Sanctuary",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Bar-headed_Geese_in_Magadi_lake_by_Samad_Kottur.jpg?width=1400",
+    "description": "Bar-headed geese at Magadi Lake, Karnataka."
+  },
+  {
+    "id": "dambal-temple",
+    "artist": "Dineshkannambadi",
+    "credit": "Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Dodda Basappa Temple.JPG",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Dodda_Basappa_Temple.JPG",
+    "name": "Dodda Basappa Temple",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Dodda_Basappa_Temple.JPG?width=1400",
+    "description": "Dodda Basappa Temple in Dambal, Gadag district."
+  },
+  {
+    "id": "annigeri-temple",
+    "artist": "Manjunath Doddamani Gajendragad",
+    "credit": "Wikimedia Commons",
+    "license": "Public domain",
+    "licenseUrl": "",
+    "title": "Amritesvara temple at Annigeri in the monsoon season.jpg",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Amritesvara_temple_at_Annigeri_in_the_monsoon_season.jpg",
+    "name": "Amruteshwara Temple, Annigeri",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Amritesvara_temple_at_Annigeri_in_the_monsoon_season.jpg?width=1400",
+    "description": "Amritesvara Temple, Annigeri."
+  },
+  {
+    "id": "mysuru-zoo",
+    "artist": "Vinodtiwari2608",
+    "credit": "Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Mysore Zoo - Animals.JPG",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Mysore_Zoo_-_Animals.JPG",
+    "name": "Mysuru Zoo",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Mysore_Zoo_-_Animals.JPG?width=1400",
+    "description": "Animals at Mysuru Zoo."
+  },
+  {
+    "id": "karanji-lake",
+    "artist": "Shalini8",
+    "credit": "Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "At karanji lake, mysore.jpg",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:At_karanji_lake,_mysore.jpg",
+    "name": "Karanji Lake",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/At_karanji_lake%2C_mysore.jpg?width=1400",
+    "description": "Karanji Lake in Mysuru."
   }
 ]

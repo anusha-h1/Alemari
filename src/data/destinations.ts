@@ -1,5 +1,6 @@
 import type { Destination } from '../types';
 import districtDestinations from '../../data/district-destinations.json';
+import { additionalDestinations } from './additionalDestinations';
 
 const featuredDestinations: Destination[] = [
   {
@@ -103,6 +104,6 @@ const featuredDestinations: Destination[] = [
   },
 ];
 
-export const destinations: Destination[] = [...featuredDestinations, ...(districtDestinations as Destination[])];
+export const destinations: Destination[] = [...featuredDestinations, ...(districtDestinations as Destination[]), ...additionalDestinations];
 
 export const destinationById = (id: string) => destinations.find((destination) => destination.id === id);

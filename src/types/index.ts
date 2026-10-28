@@ -58,6 +58,7 @@ export interface TravelMemory {
 
 export type BudgetStyle = 'Budget-friendly' | 'Moderate' | 'Premium';
 export type TripPace = 'Relaxed' | 'Balanced' | 'Adventure-packed';
+export type TripFocus = 'Any of Karnataka' | 'South Karnataka' | 'North Karnataka' | 'Coastal Karnataka' | 'Heritage & adventure' | 'Family with kids' | 'Women-only group';
 
 export interface PlannerPreferences {
   startingCity: string;
@@ -72,6 +73,8 @@ export interface PlannerPreferences {
   pace: TripPace;
   transport: string;
   accommodation: string;
+  tripFocus: TripFocus;
+  travellingWithChildren: boolean;
 }
 
 export interface ItineraryDay {

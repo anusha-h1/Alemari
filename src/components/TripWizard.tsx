@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { addDays, differenceInCalendarDays, format } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Bookmark, CalendarDays, Check, Compass, Heart, MapPin, Minus, Plus, RefreshCw, Route, Sparkles, Wallet, X } from 'lucide-react';
-import type { Category, PlannerPreferences, SavedTrip } from '../types';
+import type { Category, PlannerPreferences, SavedTrip, TripFocus } from '../types';
 import { destinations } from '../data/destinations';
 import { buildItinerary, itineraryTotal, saveTripRecord } from '../services/itinerary';
 import { requestItinerary } from '../services/api';
@@ -21,7 +21,7 @@ const interestGroups: { name: Category; summary: string; photoId: string }[] = [
 
 const initial: PlannerPreferences = {
   startingCity: 'Bengaluru', destinationId: 'hampi', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: format(addDays(new Date(), 1), 'yyyy-MM-dd'), travellers: 2,
-  availableDays: 2, interests: ['Heritage & Architecture'], budget: 6000, style: 'Budget-friendly', pace: 'Balanced', transport: 'Public transport', accommodation: 'Guesthouse',
+  availableDays: 2, interests: ['Heritage & Architecture'], budget: 6000, style: 'Budget-friendly', pace: 'Balanced', transport: 'Public transport', accommodation: 'Guesthouse', tripFocus: 'Any of Karnataka', travellingWithChildren: false,
 };
 
 function makePreferences(destinationId?: string, partial?: Partial<PlannerPreferences>): PlannerPreferences {
@@ -113,7 +113,7 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
   const progressLabels = ['Your trip', 'What you love', 'Travel style', 'Your itinerary'];
 
   return <ModalFrame title="Plan a journey that feels like yours." eyebrow="YOUR NEXT CHAPTER" onClose={onClose} className="planner-modal">
-    <div className="planner-intro"><Compass size={18} /><span>A locally generated idea — no booking data or live pricing is connected.</span></div>
+    <div className="planner-intro"><Compass size={18} /><span>A locally generated idea — use district hotel and restaurant links for live listings and confirm bookings directly.</span></div>
     <div className="planner-progress" role="group" aria-label={`Step ${step + 1} of 4`}>
       {progressLabels.map((label, index) => <button type="button" key={label} className={step === index ? 'progress-current' : index < step ? 'progress-done' : ''} aria-current={step === index ? 'step' : undefined} onClick={() => { if (index <= step) setStep(index); }}><i>{index < step ? <Check size={12} /> : index + 1}</i>{label}</button>)}
     </div>
@@ -123,6 +123,8 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
         <div className="form-grid two">
           <label className="field">Starting city<input value={preferences.startingCity} onChange={(event) => patch('startingCity', event.target.value)} placeholder="Bengaluru" /></label>
           <label className="field">Destination<select value={preferences.destinationId} onChange={(event) => chooseTripDestination(event.target.value)}><option value="surprise">Surprise me</option>{destinations.map((destination) => <option key={destination.id} value={destination.id}>{destination.name} · {destination.region}</option>)}</select></label>
+          <label className="field">Trip package<select value={preferences.tripFocus} onChange={(event) => patch('tripFocus', event.target.value as TripFocus)}><option>Any of Karnataka</option><option>South Karnataka</option><option>North Karnataka</option><option>Coastal Karnataka</option><option>Heritage &amp; adventure</option><option>Family with kids</option><option>Women-only group</option></select></label>
+          <label className="field field-check"><input type="checkbox" checked={preferences.travellingWithChildren} onChange={(event) => patch('travellingWithChildren', event.target.checked)} /> Travelling with children — favour wildlife, gardens, and gentler days</label>
           {destinationNotice && <p className="planner-constraint-notice" role="status">{destinationNotice}</p>}
           <label className="field">Start date<input type="date" value={preferences.startDate} onChange={(event) => {
             const date = event.target.value;
@@ -180,7 +182,9 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
         <div className="planner-refine-actions"><button type="button" className="back-link" disabled={generating} onClick={() => void generate(false, 'Adventure-packed')}><RefreshCw size={15} /> Make it more adventurous</button><button type="button" className="back-link" disabled={generating} onClick={() => void generate(true)}><MapPin size={15} /> Add hidden gems</button><button type="button" className="back-link" disabled={generating} onClick={() => void updateBudget()}><Wallet size={15} /> Change budget</button></div>
         <div className="planner-actions"><button type="button" className="back-link" onClick={() => setStep(2)}><ArrowLeft size={15} /> Back to travel style</button><div className="planner-result-actions"><button type="button" className="button button-outline" disabled={generating} onClick={() => void generate()}><RefreshCw size={15} /> Regenerate</button><PrimaryButton onClick={save}>{saved ? <Check size={15} /> : <Bookmark size={15} />}{saved ? 'Saved to your trips' : 'Save this trip'}</PrimaryButton></div></div>
         {saveError && <p className="form-error" role="alert">{saveError}</p>}
-        <div className="planner-bottom-links"><Route size={14} /> From {preferences.startingCity || 'your starting city'} by {preferences.transport.toLowerCase()} · {preferences.accommodation.toLowerCase()} accommodation</div>
+        {preferences.tripFocus === 'Women-only group' && <div className="planner-safety-note"><strong>Group check-in plan:</strong> share this itinerary with a trusted contact, keep phones charged, agree on a meeting point, and use registered transport. In an emergency in India call <a href="tel:112">112</a>; Women Helpline: <a href="tel:181">181</a>.</div>}
+        {preferences.travellingWithChildren && <div className="planner-safety-note"><strong>Family pace:</strong> allow extra time for meals and rest, carry water and essentials, and check age and access rules with each venue before setting out.</div>}
+        <div className="planner-bottom-links"><Route size={14} /> {preferences.tripFocus} · From {preferences.startingCity || 'your starting city'} by {preferences.transport.toLowerCase()} · {preferences.accommodation.toLowerCase()} accommodation</div>
       </motion.div>}
     </AnimatePresence>
     <button type="button" className="planner-reset" onClick={reset}><X size={14} /> Start over</button>

@@ -4,16 +4,30 @@ import type { ItineraryDay, PlannerPreferences, SavedTrip } from '../types';
 export function buildItinerary(preferences: PlannerPreferences, seed = 0): ItineraryDay[] {
   const count = Math.max(1, Math.min(10, Math.round(preferences.availableDays || 1)));
   const available = [...destinations];
-  const preferred = available.find((destination) => destination.id === preferences.destinationId);
-  const ranked = available.map((destination) => {
+  const focus = preferences.tripFocus ?? 'Any of Karnataka';
+  const southDistricts = new Set(['Mysuru', 'Mandya', 'Kodagu', 'Chamarajanagar', 'Tumakuru', 'Hassan', 'Kolar', 'Chikkaballapur', 'Bengaluru Rural', 'Bengaluru Urban', 'Bengaluru South', 'Bengaluru South (Ramanagara)']);
+  const northDistricts = new Set(['Bagalkote', 'Ballari', 'Belagavi', 'Bidar', 'Chitradurga', 'Davanagere', 'Dharwad', 'Gadag', 'Haveri', 'Kalaburagi', 'Koppal', 'Raichur', 'Vijayapura', 'Yadgir', 'Shivamogga']);
+  const inFocus = (destination: (typeof available)[number]) => {
+    if (focus === 'South Karnataka') return destination.region === 'South Karnataka' || southDistricts.has(destination.district) || destination.district.startsWith('Bengaluru South');
+    if (focus === 'North Karnataka') return destination.region === 'North Karnataka' || destination.region === 'Central Karnataka' || northDistricts.has(destination.district);
+    if (focus === 'Coastal Karnataka') return ['Dakshina Kannada', 'Udupi', 'Uttara Kannada'].includes(destination.district) || destination.region === 'Karavali Coast';
+    if (focus === 'Heritage & adventure') return ['Heritage & Architecture', 'Adventure & Trekking', 'Mountains & Hills'].includes(destination.category);
+    if (focus === 'Family with kids' || preferences.travellingWithChildren) return destination.tags.some((tag) => ['kids', 'family'].includes(tag)) || ['Mysuru', 'Gadag'].includes(destination.district) && destination.category === 'Wildlife & Nature';
+    return true;
+  };
+  const scoped = available.filter(inFocus);
+  const scopePool = scoped.length ? scoped : available;
+  const preferred = scopePool.find((destination) => destination.id === preferences.destinationId);
+  const ranked = scopePool.map((destination) => {
     const shared = destination.tags.some((tag) => preferences.interests.some((interest) => `${interest} ${destination.category}`.toLowerCase().includes(tag.toLowerCase()) || tag.toLowerCase().includes(interest.toLowerCase().split(' ')[0])));
     const interestMatch = preferences.interests.includes(destination.category);
     const budgetMatch = destination.budgetMin <= preferences.budget;
-    return { destination, score: Number(destination.id === preferred?.id) * 10 + Number(interestMatch) * 3 + Number(shared) * 2 + Number(budgetMatch) };
+    const familyBonus = (focus === 'Family with kids' || preferences.travellingWithChildren) && destination.tags.some((tag) => ['kids', 'family'].includes(tag)) ? 8 : 0;
+    return { destination, score: Number(destination.id === preferred?.id) * 10 + familyBonus + Number(interestMatch) * 3 + Number(shared) * 2 + Number(budgetMatch) };
   }).sort((a, b) => b.score - a.score || a.destination.name.localeCompare(b.destination.name));
 
-  const pool = ranked.filter((entry) => !preferences.destinationId || entry.destination.id !== preferred?.id);
-  const ordered = preferred ? [preferred, ...pool.map((entry) => entry.destination)] : pool.map((entry) => entry.destination);
+  const alternatives = ranked.filter((entry) => !preferences.destinationId || entry.destination.id !== preferred?.id);
+  const ordered = preferred ? [preferred, ...alternatives.map((entry) => entry.destination)] : alternatives.map((entry) => entry.destination);
   const used = new Set<string>();
   const pick = (day: number) => {
     const candidates = ordered.filter((destination) => !used.has(destination.id));
