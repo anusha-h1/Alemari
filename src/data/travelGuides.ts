@@ -4,7 +4,7 @@ export const karnatakaDistricts = [
   'Bagalkote', 'Ballari', 'Belagavi', 'Bengaluru Rural', 'Bengaluru South', 'Bengaluru Urban', 'Bidar', 'Chamarajanagar',
   'Chikkaballapur', 'Chikkamagaluru', 'Chitradurga', 'Dakshina Kannada', 'Davanagere', 'Dharwad', 'Gadag', 'Hassan',
   'Haveri', 'Kalaburagi', 'Kodagu', 'Kolar', 'Koppal', 'Mandya', 'Mysuru', 'Raichur', 'Shivamogga',
-  'Tumakuru', 'Udupi', 'Uttara Kannada', 'Vijayapura', 'Yadgir',
+  'Tumakuru', 'Udupi', 'Uttara Kannada', 'Vijayanagara', 'Vijayapura', 'Yadgir',
 ] as const;
 
 export const tripPackages: { focus: TripFocus; title: string; summary: string; icon: 'south' | 'north' | 'coast' | 'mix' | 'kids' | 'safety'; district?: string; interests: string[] }[] = [

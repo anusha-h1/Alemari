@@ -1,0 +1,19 @@
+.map-district-select{height:34px;min-width:145px;max-width:190px;border:1px solid var(--line);padding:0 9px;background:var(--paper);color:var(--forest);font:inherit;font-size:9px}
+.district-map-guide{position:absolute;z-index:450;right:14px;top:14px;width:min(328px,calc(100% - 28px));max-height:calc(100% - 80px);overflow:auto;padding:17px 17px 13px;background:rgba(253,252,248,.97);color:var(--forest);box-shadow:0 10px 36px rgba(20,38,29,.22);animation:district-panel-in .22s ease both}
+@keyframes district-panel-in{from{opacity:0;transform:translateX(7px)}to{opacity:1;transform:translateX(0)}}
+.district-guide-close{position:absolute;right:8px;top:8px;width:25px;height:25px;border:0;background:#edf0eb;color:var(--forest);font-size:18px;cursor:pointer}
+.district-guide-kicker{display:inline-flex;align-items:center;gap:5px;color:#8d7651;font-size:8px;font-weight:700;letter-spacing:.12em}
+.district-map-guide h3{margin:6px 28px 4px 0;font:500 27px var(--serif)}
+.district-map-guide>p{margin:0 0 12px;color:#69766c;font-size:9px;line-height:1.55}
+.district-map-guide ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.district-map-guide li{border-bottom:1px solid var(--line)}
+.district-place-link{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;padding:8px 1px;border:0;background:transparent;color:var(--forest);text-align:left;text-decoration:none;cursor:pointer}
+.district-place-link:hover{color:var(--terra)}
+.district-place-link>span{display:grid;gap:2px}
+.district-place-link strong{font-size:10px;font-weight:600}
+.district-place-link small{color:#778077;font-size:8px}
+.district-place-link>svg{flex:none;color:#9a8060}
+.district-source-link{display:inline-flex;align-items:center;gap:5px;margin-top:11px;color:var(--forest);font-size:8px;text-decoration:underline;text-underline-offset:2px}
+.district-center-note{display:block;margin-top:7px;color:#899188;font-size:7px}
+@media(max-width:920px){.map-district-select{min-width:130px;flex:1}}
+@media(max-width:620px){.map-district-select{order:0;flex:1 1 calc(50% - 4px);max-width:none}.map-search{order:1}.map-category-select{order:2}.map-filter{order:3}.district-map-guide{right:8px;top:8px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 58px);padding:12px}.district-map-guide h3{font-size:22px}.district-map-guide>p{font-size:8px;margin-bottom:8px}.district-map-guide li{padding:0}.district-place-link{padding:6px 1px}.district-place-link strong{font-size:9px}}

@@ -2,18 +2,23 @@ import { useEffect, useMemo, useState } from 'react';
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Check, Heart, MapPin, Navigation2, Search } from 'lucide-react';
+import { Check, Heart, MapPin, Navigation2, Search, ExternalLink } from 'lucide-react';
 import type { Destination } from '../types';
 import { categories } from '../types';
+import { karnatakaDistricts } from '../data/travelGuides';
+import { districtAttractions, districtMapUrl } from '../data/districtAttractions';
 import { DestinationImage, PrimaryButton } from './ui';
 
 const karnatakaCenter: L.LatLngExpression = [14.25, 75.55];
 
-function MapViewSync({ selected }: { selected?: Destination }) {
+function MapViewSync({ selected, districtCenter }: { selected?: Destination; districtCenter?: [number, number] }) {
   const map = useMap();
   useEffect(() => {
     if (selected) map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 9), { duration: 0.7 });
   }, [map, selected]);
+  useEffect(() => {
+    if (!selected && districtCenter) map.flyTo(districtCenter, 9, { duration: 0.7 });
+  }, [map, selected, districtCenter]);
   useEffect(() => {
     const reset = () => map.flyTo(karnatakaCenter, 7, { duration: 0.7 });
     window.addEventListener('alemari-map-reset', reset);
@@ -39,20 +44,31 @@ function Pin({ destination, visited, selected, actionAccent, onSelect }: { desti
   </CircleMarker>;
 }
 
-export function KarnatakaMap({ destinations, actionAccent, favorites, visited, selectedId, onlyVisited, onOnlyVisited, onSelect, onFavorite, onVisited, onAddTrip, onDetails, onAddMemory, onViewMemories, hasMemories }: {
-  destinations: Destination[]; actionAccent: string; favorites: string[]; visited: string[]; selectedId: string; onlyVisited: boolean;
+export function KarnatakaMap({ destinations, allDestinations, actionAccent, favorites, visited, selectedId, onlyVisited, onOnlyVisited, onSelect, onFavorite, onVisited, onAddTrip, onDetails, onAddMemory, onViewMemories, hasMemories }: {
+  destinations: Destination[]; allDestinations: Destination[]; actionAccent: string; favorites: string[]; visited: string[]; selectedId: string; onlyVisited: boolean;
   onOnlyVisited: () => void; onSelect: (id: string) => void; onFavorite: (id: string) => void;
   onVisited: (id: string) => void; onAddTrip: (id: string) => void; onDetails: (id: string) => void; onAddMemory: (id: string) => void;
   onViewMemories: (id: string) => void; hasMemories: (id: string) => boolean;
 }) {
   const [mapQuery, setMapQuery] = useState('');
   const [mapCategory, setMapCategory] = useState('All categories');
+  const [district, setDistrict] = useState('');
   const [tileError, setTileError] = useState(false);
-  const mapDestinations = useMemo(() => destinations.filter((destination) => (!mapQuery || `${destination.name} ${destination.district} ${destination.region}`.toLowerCase().includes(mapQuery.toLowerCase())) && (mapCategory === 'All categories' || destination.category === mapCategory)), [destinations, mapQuery, mapCategory]);
-  const selected = mapDestinations.find((destination) => destination.id === selectedId);
+  const mapDestinations = useMemo(() => destinations.filter((destination) => {
+    const isDistrictPlace = district && (destination.district === district || district === 'Bengaluru South' && destination.district.startsWith('Bengaluru South'));
+    return isDistrictPlace || ((!mapQuery || `${destination.name} ${destination.district} ${destination.region}`.toLowerCase().includes(mapQuery.toLowerCase())) && (mapCategory === 'All categories' || destination.category === mapCategory));
+  }), [destinations, mapQuery, mapCategory, district]);
+  const selected = mapDestinations.find((destination) => destination.id === selectedId) ?? allDestinations.find((destination) => destination.id === selectedId);
+  const guide = district ? districtAttractions[district] : undefined;
+  const matchingDistrictPlaces = useMemo(() => guide?.attractions.map((attraction) => ({
+    ...attraction,
+    destination: allDestinations.find((destination) => destination.name.toLowerCase() === attraction.name.toLowerCase() && (destination.district === district || destination.district.startsWith(`${district} `)))
+      ?? (district === 'Bengaluru South' ? allDestinations.find((destination) => destination.district.startsWith('Bengaluru South')) : undefined),
+  })) ?? [], [guide, allDestinations, district]);
   return <div className="map-shell">
     <div className="map-toolbar">
       <span className="map-toolbar-title"><span className="map-live-dot" /> KARNATAKA, INDIA</span>
+      <select className="map-district-select" value={district} onChange={(event) => { setDistrict(event.target.value); onSelect(''); }} aria-label="Choose a district to explore"><option value="">Choose district</option>{karnatakaDistricts.map((name) => <option key={name}>{name}</option>)}</select>
       <label className="map-search"><Search size={14} /><input value={mapQuery} onChange={(event) => setMapQuery(event.target.value)} placeholder="Find a place on the map" aria-label="Search map places" />{mapQuery && <button onClick={() => setMapQuery('')} aria-label="Clear map search">×</button>}</label>
       <select className="map-category-select" value={mapCategory} onChange={(event) => setMapCategory(event.target.value)} aria-label="Filter map by category"><option>All categories</option>{categories.map((category) => <option key={category}>{category}</option>)}</select>
       <button className={`map-filter ${onlyVisited ? 'map-filter-active' : ''}`} onClick={onOnlyVisited}><Check size={14} /> Visited only</button>
@@ -60,10 +76,22 @@ export function KarnatakaMap({ destinations, actionAccent, favorites, visited, s
     <div className="map-display">
       <MapContainer center={karnatakaCenter} zoom={7} scrollWheelZoom className="leaflet-map" zoomControl>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' eventHandlers={{ tileerror: () => setTileError(true), load: () => setTileError(false) }} />
-        <MapViewSync selected={selected} />
+        <MapViewSync selected={selected} districtCenter={guide?.center} />
         {mapDestinations.map((destination) => <Pin key={destination.id} destination={destination} visited={visited.includes(destination.id)} selected={selectedId === destination.id} actionAccent={actionAccent} onSelect={onSelect} />)}
       </MapContainer>
-      <div className="map-reset-wrap"><button className="map-reset" onClick={() => { onSelect(''); window.dispatchEvent(new CustomEvent('alemari-map-reset')); }} aria-label="Reset map to Karnataka">Reset view</button></div>
+      <div className="map-reset-wrap"><button className="map-reset" onClick={() => { setDistrict(''); onSelect(''); window.dispatchEvent(new CustomEvent('alemari-map-reset')); }} aria-label="Reset map to Karnataka">Reset view</button></div>
+      {guide && <aside className="district-map-guide" aria-label={`${district} places to explore`}>
+        <button className="district-guide-close" onClick={() => setDistrict('')} aria-label="Close district guide">×</button>
+        <span className="district-guide-kicker"><MapPin size={12} /> DISTRICT GUIDE</span>
+        <h3>{district}</h3>
+        <p>Start with these places, then open the map for directions and current details.</p>
+        <ol>{matchingDistrictPlaces.map((place) => <li key={place.name}>
+          {place.destination ? <button className="district-place-link" onClick={() => onSelect(place.destination!.id)}><span><strong>{place.name}</strong><small>{place.kind}</small></span><Navigation2 size={14} /></button>
+            : <a className="district-place-link" href={districtMapUrl(place.name, district)} target="_blank" rel="noreferrer"><span><strong>{place.name}</strong><small>{place.kind}</small></span><ExternalLink size={13} /></a>}
+        </li>)}</ol>
+        <a className="district-source-link" href={guide.source} target="_blank" rel="noreferrer">Karnataka Tourism guide <ExternalLink size={12} /></a>
+        <small className="district-center-note">Map centered near the district headquarters.</small>
+      </aside>}
       {selected && <aside className="map-detail-card">
         <button className="map-detail-close" onClick={() => onSelect('')} aria-label="Close destination details">×</button>
         <DestinationImage src={selected.image} alt={selected.name} />

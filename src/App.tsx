@@ -24,6 +24,7 @@ import { BrandMark, DestinationCard, DestinationImage, PrimaryButton, SectionHea
 import './styles/global.css';
 import './styles/palette.css';
 import './styles/travel-guides.css';
+import './styles/district-map.css';
 
 const navItems = [
   ['discover', 'Discover places'], ['map', 'Karnataka map'], ['memories', 'My memories'], ['calendar', 'Travel journal'], ['assistant', 'Travel buddy'],
@@ -303,7 +304,7 @@ function App() {
       </section>
 
       <section className="map-section section-pad" id="map" ref={mapSection}><div className="section-top-row"><SectionHeading eyebrow="FIND YOUR BEARINGS" title="Karnataka, at a glance." subtitle={`${destinations.length} places across ${catalogueDistrictCount} districts. Each pin opens a real place and a new possibility.`} /><button className="map-filter-shortcut" onClick={() => { setMapVisitedOnly((value) => !value); }}>{mapVisitedOnly ? 'Show every place' : 'My Karnataka map'} <MapPin size={15} /></button></div>
-        <KarnatakaMap destinations={mapDestinations} actionAccent={actionAccent} favorites={store.preferences.favorites} visited={store.preferences.visited} selectedId={selectedId} onlyVisited={mapVisitedOnly} onOnlyVisited={() => setMapVisitedOnly((value) => !value)} onSelect={mapSelect} onFavorite={(id) => store.toggleFavorite(id)} onVisited={(id) => store.toggleVisited(id)} onAddTrip={(id) => addToTrip(id)} onDetails={(id) => openDestination(id)} onAddMemory={(id) => addMemory(format(new Date(), 'yyyy-MM-dd'), id)} onViewMemories={(id) => { scrollTo('memories'); setJournalTab('timeline'); setTimeout(() => { const memory = sortedMemories.find((item) => item.destinationId === id); if (memory) openTimelineMemory(memory); }, 550); }} hasMemories={(id) => sortedMemories.some((memory) => memory.destinationId === id)} />
+        <KarnatakaMap destinations={mapDestinations} allDestinations={destinations} actionAccent={actionAccent} favorites={store.preferences.favorites} visited={store.preferences.visited} selectedId={selectedId} onlyVisited={mapVisitedOnly} onOnlyVisited={() => setMapVisitedOnly((value) => !value)} onSelect={mapSelect} onFavorite={(id) => store.toggleFavorite(id)} onVisited={(id) => store.toggleVisited(id)} onAddTrip={(id) => addToTrip(id)} onDetails={(id) => openDestination(id)} onAddMemory={(id) => addMemory(format(new Date(), 'yyyy-MM-dd'), id)} onViewMemories={(id) => { scrollTo('memories'); setJournalTab('timeline'); setTimeout(() => { const memory = sortedMemories.find((item) => item.destinationId === id); if (memory) openTimelineMemory(memory); }, 550); }} hasMemories={(id) => sortedMemories.some((memory) => memory.destinationId === id)} />
         <div className="map-context-row"><p><span>PINNED WITH INTENTION</span> Approximate destination coordinates on a real OpenStreetMap base layer. No invented state border.</p><button onClick={() => { setMapVisitedOnly(true); scrollTo('map'); }}>Show places I’ve been <ArrowRight size={15} /></button></div>
       </section>
 

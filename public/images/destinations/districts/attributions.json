@@ -110,14 +110,14 @@
   {
     "id": "dharmasthala",
     "name": "Dharmasthala temple",
-    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Sri_Manjunatha_Swamy_Temple%2C_Dharmasthala%2C_Karnataka_06.jpg?width=1400",
-    "title": "Sri Manjunatha Swamy Temple, Dharmasthala, Karnataka 06.jpg",
-    "sourcePage": "https://commons.wikimedia.org/wiki/File:Sri_Manjunatha_Swamy_Temple,_Dharmasthala,_Karnataka_06.jpg",
-    "license": "CC0",
-    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "artist": "A.Murali",
+    "file": "https://commons.wikimedia.org/wiki/Special:FilePath/Dharmasthala_Temple_Tower.jpg?width=1400",
+    "title": "Dharmasthala Temple Tower.jpg",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Dharmasthala_Temple_Tower.jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "artist": "Gopal Venkatesan",
     "credit": "Wikimedia Commons",
-    "description": "Temple exterior in Dharmasthala."
+    "description": "Temple tower at Dharmasthala."
   },
   {
     "id": "kunduvada-lake",
@@ -265,14 +265,15 @@
   },
   {
     "id": "gadag-zoo",
-    "artist": "Zoo Authority of Karnataka",
-    "credit": "Zoo Authority of Karnataka",
-    "license": "Official zoo image",
-    "title": "Binkadakatti Zoo tiger image",
+    "artist": "Gadag District Administration",
+    "credit": "Government of Karnataka",
+    "license": "Government district website photo; terms apply",
+    "licenseUrl": "https://gadag.nic.in/en/website-policies/",
+    "title": "Gadag Zoo",
     "sourcePage": "https://gadag.nic.in/en/tourist-place/gadag-zoo/",
     "name": "Binkadakatti Zoo",
-    "file": "https://www.zoosofkarnataka.com/assets/img/detailPage/tiger.jpg",
-    "description": "Wildlife image from the official zoo website."
+    "file": "https://cdn.s3waas.gov.in/s3912d2b1c7b2826caf99687388d2e8f7c/uploads/bfi_thumb/2021070768-rr7n618a5rif2zehxi22lukkpbqiaa9h8cjvjydtvu.jpg",
+    "description": "Official district image for Binkadakatti Zoo."
   },
   {
     "id": "kappatagudda",
