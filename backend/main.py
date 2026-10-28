@@ -182,6 +182,9 @@ def generate_itinerary(request: ItineraryRequest):
     route = local_ranked + local_extra
     if not route:
         route = [anchor]
+    if len(route) > 2:
+        offset = request.seed % (len(route) - 1)
+        route = [route[0], *route[1 + offset:], *route[1:1 + offset]]
     days = []
     for index in range(request.availableDays):
         place = route[index] if index < len(route) else route[index % len(route)]

@@ -76,7 +76,9 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
     commit(next); setGenerating(true);
     try {
       const result = await requestItinerary(next, seed);
-      setDays(isLocalUniqueItinerary(next, result.days) ? result.days : buildItinerary(next, seed));
+      const localDays = buildItinerary(next, seed);
+      const repeatsCurrent = JSON.stringify(result.days.map((day) => day.destinationIds[0])) === JSON.stringify(days.map((day) => day.destinationIds[0]));
+      setDays(isLocalUniqueItinerary(next, result.days) && !repeatsCurrent ? result.days : localDays);
     }
     catch { setDays(buildItinerary(next, seed)); }
     finally { setGenerating(false); }

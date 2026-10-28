@@ -66,7 +66,9 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
   const nearbyIds = new Set(nearby.map((destination) => destination.id));
   const localAlternatives = available.filter((destination) => !nearbyIds.has(destination.id) && distanceKm(anchor, destination) <= MAX_ROUTE_RADIUS_KM)
     .sort((a, b) => distanceKm(anchor, a) - distanceKm(anchor, b));
-  const ordered = [...(nearby.length ? nearby : [anchor]), ...localAlternatives];
+  const alternatives = [...(nearby.length ? nearby : [anchor]).filter((destination) => destination.id !== anchor.id), ...localAlternatives];
+  const offset = alternatives.length ? seed % alternatives.length : 0;
+  const ordered = [anchor, ...alternatives.slice(offset), ...alternatives.slice(0, offset)];
   const used = new Set<string>();
   const pick = (day: number) => {
     if (day === 0 || ordered.length === 1) {
