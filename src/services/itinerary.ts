@@ -1,6 +1,8 @@
 import { destinations } from '../data/destinations';
 import type { ItineraryDay, PlannerPreferences, SavedTrip } from '../types';
 
+const MAX_ROUTE_RADIUS_KM = 150;
+
 const startCityCoordinates: Record<string, [number, number]> = {
   bengaluru: [12.9716, 77.5946], bangalore: [12.9716, 77.5946], mysuru: [12.2958, 76.6394], mysore: [12.2958, 76.6394],
   gadag: [15.429, 75.63], hubballi: [15.3647, 75.124], hubli: [15.3647, 75.124], dharwad: [15.4589, 75.0078],
@@ -54,7 +56,7 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
     return (b.score - bDistance / 30) - (a.score - aDistance / 30);
   })[0]?.destination ?? scopePool[0];
   const nearby = ranked
-    .filter(({ destination }) => destination.id === anchor.id || distanceKm(anchor, destination) <= 100)
+    .filter(({ destination }) => destination.id === anchor.id || distanceKm(anchor, destination) <= MAX_ROUTE_RADIUS_KM)
     .sort((a, b) => {
       if (a.destination.id === anchor.id) return -1;
       if (b.destination.id === anchor.id) return 1;
@@ -62,10 +64,9 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
     })
     .map(({ destination }) => destination);
   const nearbyIds = new Set(nearby.map((destination) => destination.id));
-  const farther = ranked.filter(({ destination }) => !nearbyIds.has(destination.id))
-    .sort((a, b) => distanceKm(anchor, a.destination) - distanceKm(anchor, b.destination))
-    .map(({ destination }) => destination);
-  const ordered = [...(nearby.length ? nearby : [anchor]), ...farther];
+  const localAlternatives = available.filter((destination) => !nearbyIds.has(destination.id) && distanceKm(anchor, destination) <= MAX_ROUTE_RADIUS_KM)
+    .sort((a, b) => distanceKm(anchor, a) - distanceKm(anchor, b));
+  const ordered = [...(nearby.length ? nearby : [anchor]), ...localAlternatives];
   const used = new Set<string>();
   const pick = (day: number) => {
     if (day === 0 || ordered.length === 1) {
@@ -74,7 +75,7 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
     }
     const candidates = ordered.filter((destination) => !used.has(destination.id));
     if (!candidates.length) return ordered[(day + seed) % ordered.length];
-    const choice = candidates[(day - 1 + seed) % Math.min(candidates.length, 3)];
+    const choice = candidates[0];
     used.add(choice.id);
     return choice;
   };
@@ -116,6 +117,19 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
       tip: destination.category === 'Adventure & Trekking' ? 'Check local permissions, route conditions, and weather before you set out.' : 'Confirm local opening times and transport before travelling; conditions can change by season.',
     };
   });
+}
+
+export function isLocalUniqueItinerary(preferences: PlannerPreferences, days: ItineraryDay[]) {
+  if (!days.length) return false;
+  const places = days.map((day) => destinations.find((destination) => destination.id === day.destinationIds[0]));
+  if (places.some((place) => !place)) return false;
+  const resolved = places.filter((place): place is (typeof destinations)[number] => Boolean(place));
+  const ids = resolved.map((place) => place.id);
+  if (new Set(ids).size !== ids.length) return false;
+  const preferred = destinations.find((destination) => destination.id === preferences.destinationId);
+  if (preferred && ids[0] !== preferred.id) return false;
+  const anchor = preferred ?? resolved[0];
+  return resolved.every((place) => distanceKm(anchor, place) <= MAX_ROUTE_RADIUS_KM);
 }
 
 export const itineraryTotal = (days: ItineraryDay[]) => days.reduce((sum, day) => sum + day.travelCost + day.foodCost + day.stayCost, 0);

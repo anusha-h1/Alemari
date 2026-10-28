@@ -36,6 +36,11 @@ DESTINATIONS = [
     {"id":"kabini","name":"Kabini","district":"Mysuru","region":"South Karnataka","lat":11.966,"lng":76.3308,"category":"Wildlife & Nature","tags":["wildlife","forest","nature"],"days":2,"budgetMin":7000,"budgetMax":22000,"highlights":["Kabini backwaters","Wildlife safari","Forest landscape"]},
 ]
 DESTINATIONS.extend(json.loads((ROOT.parent / "data" / "district-destinations.json").read_text(encoding="utf-8")))
+DESTINATIONS.extend([
+    {"id":"gadag-zoo","name":"Binkadakatti Zoo","district":"Gadag","region":"North Karnataka","lat":15.405,"lng":75.62,"category":"Wildlife & Nature","tags":["wildlife","zoo","kids","family"],"days":1,"budgetMin":500,"budgetMax":1800,"highlights":["Zoo and wildlife exhibits","Family outing","Gadag town"]},
+    {"id":"mysuru-zoo","name":"Mysuru Zoo","district":"Mysuru","region":"South Karnataka","lat":12.3009,"lng":76.6653,"category":"Wildlife & Nature","tags":["wildlife","zoo","kids","family"],"days":1,"budgetMin":500,"budgetMax":2500,"highlights":["Sri Chamarajendra Zoological Gardens","Wildlife learning","Karanji Lake"]},
+    {"id":"karanji-lake","name":"Karanji Lake Nature Park","district":"Mysuru","region":"South Karnataka","lat":12.2994,"lng":76.6699,"category":"Wildlife & Nature","tags":["lake","birds","kids","family","nature"],"days":1,"budgetMin":300,"budgetMax":1500,"highlights":["Lake and bird habitat","Family nature break","Near Mysuru Zoo"]},
+])
 
 
 @contextmanager
@@ -93,6 +98,8 @@ class ItineraryRequest(BaseModel):
     travellers: int = Field(default=2, ge=1, le=30)
     availableDays: int = Field(default=2, ge=1, le=10)
     interests: list[str] = Field(default_factory=list, max_length=20)
+    tripFocus: str = "Any of Karnataka"
+    travellingWithChildren: bool = False
     budget: int = Field(default=6000, ge=0, le=100_000_000)
     style: str = "Budget-friendly"
     pace: str = "Balanced"
@@ -127,17 +134,57 @@ def get_destination(destination_id: str):
 
 @app.post("/api/itinerary")
 def generate_itinerary(request: ItineraryRequest):
+    max_radius_km = 150
+    south_districts = {"Mysuru", "Mandya", "Kodagu", "Chamarajanagar", "Tumakuru", "Hassan", "Kolar", "Chikkaballapur", "Bengaluru Rural", "Bengaluru Urban", "Bengaluru South"}
+    north_districts = {"Bagalkote", "Ballari", "Belagavi", "Bidar", "Chitradurga", "Davanagere", "Dharwad", "Gadag", "Haveri", "Kalaburagi", "Koppal", "Raichur", "Vijayapura", "Vijayanagara", "Yadgir", "Shivamogga"}
+
+    def in_focus(item: dict[str, Any]) -> bool:
+        focus = request.tripFocus
+        if focus == "South Karnataka":
+            return item["region"] == "South Karnataka" or item["district"] in south_districts or item["district"].startswith("Bengaluru South")
+        if focus == "North Karnataka":
+            return item["region"] in {"North Karnataka", "Central Karnataka"} or item["district"] in north_districts
+        if focus == "Coastal Karnataka":
+            return item["district"] in {"Dakshina Kannada", "Udupi", "Uttara Kannada"} or item["region"] == "Karavali Coast"
+        if focus == "Heritage & adventure":
+            return item["category"] in {"Heritage & Architecture", "Adventure & Trekking", "Mountains & Hills"}
+        if focus == "Family with kids" or request.travellingWithChildren:
+            return bool(set(item["tags"]) & {"kids", "family"}) or item["district"] in {"Mysuru", "Gadag"} and item["category"] == "Wildlife & Nature"
+        return True
+
     preferred = next((item for item in DESTINATIONS if item["id"] == request.destinationId), None)
-    ranked = sorted(DESTINATIONS, key=lambda item: (item is not preferred, not (item["category"] in request.interests), item["budgetMin"]))
+    scoped = [item for item in DESTINATIONS if in_focus(item) or item is preferred]
+    if not scoped:
+        scoped = DESTINATIONS
+
+    def distance_km(a: dict[str, Any], b: dict[str, Any]) -> float:
+        from math import atan2, cos, radians, sin, sqrt
+        lat_a, lat_b = radians(a["lat"]), radians(b["lat"])
+        d_lat, d_lng = lat_b - lat_a, radians(b["lng"] - a["lng"])
+        value = sin(d_lat / 2) ** 2 + cos(lat_a) * cos(lat_b) * sin(d_lng / 2) ** 2
+        return 6371 * 2 * atan2(sqrt(value), sqrt(1 - value))
+
+    start_cities = {
+        "bengaluru": {"lat": 12.9716, "lng": 77.5946}, "bangalore": {"lat": 12.9716, "lng": 77.5946},
+        "mysuru": {"lat": 12.2958, "lng": 76.6394}, "mysore": {"lat": 12.2958, "lng": 76.6394},
+        "gadag": {"lat": 15.429, "lng": 75.63}, "hubballi": {"lat": 15.3647, "lng": 75.124}, "hubli": {"lat": 15.3647, "lng": 75.124},
+        "dharwad": {"lat": 15.4589, "lng": 75.0078}, "mangaluru": {"lat": 12.9141, "lng": 74.856}, "mangalore": {"lat": 12.9141, "lng": 74.856},
+        "udupi": {"lat": 13.3409, "lng": 74.7421}, "ballari": {"lat": 15.1394, "lng": 76.9214}, "hampi": {"lat": 15.335, "lng": 76.46},
+    }
+    start = start_cities.get(request.startingCity.strip().casefold())
+    score = lambda item: (item is preferred, item["category"] in request.interests, item["budgetMin"] <= request.budget)
+    ranked = sorted(scoped, key=lambda item: (not score(item)[0], not score(item)[1], not score(item)[2], item["name"]))
+    local_to_start = [item for item in ranked if start and distance_km(start, item) <= max_radius_km]
+    anchor = preferred or (local_to_start[0] if local_to_start else ranked[0])
+    local_ranked = sorted((item for item in ranked if item is anchor or distance_km(anchor, item) <= max_radius_km), key=lambda item: (item is not anchor, distance_km(anchor, item), not score(item)[1]))
+    local_ids = {item["id"] for item in local_ranked}
+    local_extra = sorted((item for item in DESTINATIONS if item["id"] not in local_ids and distance_km(anchor, item) <= max_radius_km), key=lambda item: distance_km(anchor, item))
+    route = local_ranked + local_extra
+    if not route:
+        route = [anchor]
     days = []
     for index in range(request.availableDays):
-        if preferred and index == 0:
-            place = preferred
-        elif preferred:
-            alternatives = [item for item in ranked if item is not preferred]
-            place = alternatives[(index - 1 + request.seed) % len(alternatives)]
-        else:
-            place = ranked[(index + request.seed) % len(ranked)]
+        place = route[index] if index < len(route) else route[index % len(route)]
         daily = min(request.budget // request.availableDays, round(((place["budgetMin"] + place["budgetMax"]) / 2 / max(place["days"], 1)) * request.travellers))
         travel, food = int(daily * .3), int(daily * .25)
         highlights = place["highlights"]

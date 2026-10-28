@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, CalendarDays, Check, Compass, Heart, MapPin, Minus, Plus, RefreshCw, Route, Sparkles, Wallet, X } from 'lucide-react';
 import type { Category, PlannerPreferences, SavedTrip, TripFocus } from '../types';
 import { destinations } from '../data/destinations';
-import { buildItinerary, itineraryTotal, saveTripRecord } from '../services/itinerary';
+import { buildItinerary, isLocalUniqueItinerary, itineraryTotal, saveTripRecord } from '../services/itinerary';
 import { requestItinerary } from '../services/api';
 import { DestinationImage, ModalFrame, PrimaryButton } from './ui';
 
@@ -74,7 +74,10 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
       interests: addHidden && !preferences.interests.includes('Hidden Gems') ? [...preferences.interests, 'Hidden Gems' as Category] : preferences.interests,
     };
     commit(next); setGenerating(true);
-    try { setDays((await requestItinerary(next, seed)).days); }
+    try {
+      const result = await requestItinerary(next, seed);
+      setDays(isLocalUniqueItinerary(next, result.days) ? result.days : buildItinerary(next, seed));
+    }
     catch { setDays(buildItinerary(next, seed)); }
     finally { setGenerating(false); }
     setSeed((value) => value + 1); setSaved(false); setStep(3);
@@ -82,7 +85,10 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
   const updateBudget = async () => {
     const next = { ...preferences, budget: Math.max(500, preferences.budget + 2000) };
     commit(next); setGenerating(true);
-    try { setDays((await requestItinerary(next, seed)).days); }
+    try {
+      const result = await requestItinerary(next, seed);
+      setDays(isLocalUniqueItinerary(next, result.days) ? result.days : buildItinerary(next, seed));
+    }
     catch { setDays(buildItinerary(next, seed)); }
     finally { setGenerating(false); }
     setSeed((value) => value + 1); setSaved(false);
@@ -175,7 +181,7 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
               setStep(0); setSaved(false); setSaveError(''); setDestinationNotice(`Planning options for ${place.name} are ready.`);
             }} aria-label={place ? `Plan a trip to ${place.name}` : 'Destination photo'}>
               <DestinationImage src={place?.image} alt={place?.name ?? 'Karnataka landscape'} />
-              <span><ArrowUpRight size={13} />Plan this place</span>
+              <span><ArrowUpRight size={13} />Plan my trip</span>
             </button>
             <div className="itinerary-day-content"><span className="itinerary-day-number">DAY {String(day.day).padStart(2, '0')} <b>·</b> {place?.region}</span><h4>{place?.name}</h4>
               <div className="itinerary-timetable"><p><small>MORNING</small>{day.morning}</p><p><small>AFTERNOON</small>{day.afternoon}</p><p><small>EVENING</small>{day.evening}</p></div>

@@ -54,7 +54,7 @@ export function DestinationCard({ destination, favorite, visited, selected, onFa
     <button className="destination-image-button" onClick={onAddTrip} aria-label={`Plan a trip to ${destination.name}`}>
       <DestinationImage src={destination.image} alt={`${destination.name}, ${destination.region}`} />
       <span className="image-location"><MapPin size={13} />{destination.district}</span>
-      <span className="image-plan-callout"><ArrowUpRight size={12} />Plan a trip</span>
+      <span className="image-plan-callout"><ArrowUpRight size={12} />Plan my trip</span>
       {visited && <span className="visited-ribbon"><Check size={13} /> Been there</span>}
     </button>
     <div className="destination-card-body">
