@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addDays, differenceInCalendarDays, format } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Bookmark, CalendarDays, Check, Compass, Heart, MapPin, Minus, Plus, RefreshCw, Route, Sparkles, Wallet, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, CalendarDays, Check, Compass, Heart, MapPin, Minus, Plus, RefreshCw, Route, Sparkles, Wallet, X } from 'lucide-react';
 import type { Category, PlannerPreferences, SavedTrip, TripFocus } from '../types';
 import { destinations } from '../data/destinations';
 import { buildItinerary, itineraryTotal, saveTripRecord } from '../services/itinerary';
@@ -169,7 +169,14 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
         <div className="itinerary-days">{days.map((day) => {
           const place = destinations.find((destination) => destination.id === day.destinationIds[0]);
           return <article className="itinerary-day" key={`${seed}-${day.day}`}>
-            <DestinationImage src={place?.image} alt={place?.name ?? 'Karnataka landscape'} />
+            <button type="button" className="itinerary-photo-plan" disabled={!place} onClick={() => {
+              if (!place) return;
+              commit({ ...preferences, destinationId: place.id });
+              setStep(0); setSaved(false); setSaveError(''); setDestinationNotice(`Planning options for ${place.name} are ready.`);
+            }} aria-label={place ? `Plan a trip to ${place.name}` : 'Destination photo'}>
+              <DestinationImage src={place?.image} alt={place?.name ?? 'Karnataka landscape'} />
+              <span><ArrowUpRight size={13} />Plan this place</span>
+            </button>
             <div className="itinerary-day-content"><span className="itinerary-day-number">DAY {String(day.day).padStart(2, '0')} <b>·</b> {place?.region}</span><h4>{place?.name}</h4>
               <div className="itinerary-timetable"><p><small>MORNING</small>{day.morning}</p><p><small>AFTERNOON</small>{day.afternoon}</p><p><small>EVENING</small>{day.evening}</p></div>
               <div className="itinerary-costs"><span>Travel <b>₹{day.travelCost.toLocaleString('en-IN')}</b></span><span>Food <b>₹{day.foodCost.toLocaleString('en-IN')}</b></span><span>Stay <b>₹{day.stayCost.toLocaleString('en-IN')}</b></span></div>

@@ -15,5 +15,12 @@
 .district-place-link>svg{flex:none;color:#9a8060}
 .district-source-link{display:inline-flex;align-items:center;gap:5px;margin-top:11px;color:var(--forest);font-size:8px;text-decoration:underline;text-underline-offset:2px}
 .district-center-note{display:block;margin-top:7px;color:#899188;font-size:7px}
+.image-plan-callout{position:absolute;right:9px;bottom:9px;display:inline-flex;align-items:center;gap:4px;padding:7px 9px;background:rgba(253,252,248,.95);color:var(--forest);font-size:8px;box-shadow:0 2px 8px rgba(20,36,28,.15);transition:background .18s,color .18s}
+.destination-image-button:hover .image-plan-callout,.destination-image-button:focus-visible .image-plan-callout{background:var(--forest);color:#fff}
+.itinerary-photo-plan{position:relative;display:block;width:160px;height:100%;min-height:207px;padding:0;border:0;background:#e6ece6;overflow:hidden;cursor:pointer}
+.itinerary-photo-plan>img{display:block;width:100%;height:100%;min-height:inherit;object-fit:cover;transition:transform .35s}
+.itinerary-photo-plan:hover>img{transform:scale(1.04)}
+.itinerary-photo-plan>span{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:4px;padding:7px 9px;background:rgba(253,252,248,.95);color:var(--forest);font-size:8px;box-shadow:0 2px 8px rgba(20,36,28,.15)}
+.itinerary-photo-plan:hover>span,.itinerary-photo-plan:focus-visible>span{background:var(--forest);color:#fff}
 @media(max-width:920px){.map-district-select{min-width:130px;flex:1}}
-@media(max-width:620px){.map-district-select{order:0;flex:1 1 calc(50% - 4px);max-width:none}.map-search{order:1}.map-category-select{order:2}.map-filter{order:3}.district-map-guide{right:8px;top:8px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 58px);padding:12px}.district-map-guide h3{font-size:22px}.district-map-guide>p{font-size:8px;margin-bottom:8px}.district-map-guide li{padding:0}.district-place-link{padding:6px 1px}.district-place-link strong{font-size:9px}}
+@media(max-width:620px){.map-district-select{order:0;flex:1 1 calc(50% - 4px);max-width:none}.map-search{order:1}.map-category-select{order:2}.map-filter{order:3}.district-map-guide{right:8px;top:8px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 58px);padding:12px}.district-map-guide h3{font-size:22px}.district-map-guide>p{font-size:8px;margin-bottom:8px}.district-map-guide li{padding:0}.district-place-link{padding:6px 1px}.district-place-link strong{font-size:9px}.itinerary-day{grid-template-columns:82px 1fr}.itinerary-photo-plan{width:82px;min-height:100%}.itinerary-photo-plan>span{left:3px;bottom:3px;padding:4px;font-size:6px}.itinerary-photo-plan>span svg{width:10px;height:10px}}

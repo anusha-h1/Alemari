@@ -51,9 +51,10 @@ export function DestinationCard({ destination, favorite, visited, selected, onFa
   onFavorite: () => void; onVisited: () => void; onExplore: () => void; onAddTrip: () => void;
 }) {
   return <motion.article layout whileHover={{ y: -5 }} transition={{ duration: .24 }} className={`destination-card ${compact ? 'destination-card-compact' : ''} ${selected ? 'destination-card-selected' : ''}`}>
-    <button className="destination-image-button" onClick={onExplore} aria-label={`Explore ${destination.name}`}>
+    <button className="destination-image-button" onClick={onAddTrip} aria-label={`Plan a trip to ${destination.name}`}>
       <DestinationImage src={destination.image} alt={`${destination.name}, ${destination.region}`} />
       <span className="image-location"><MapPin size={13} />{destination.district}</span>
+      <span className="image-plan-callout"><ArrowUpRight size={12} />Plan a trip</span>
       {visited && <span className="visited-ribbon"><Check size={13} /> Been there</span>}
     </button>
     <div className="destination-card-body">

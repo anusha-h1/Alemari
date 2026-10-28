@@ -30,7 +30,7 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
     if (focus === 'Family with kids' || preferences.travellingWithChildren) return destination.tags.some((tag) => ['kids', 'family'].includes(tag)) || ['Mysuru', 'Gadag'].includes(destination.district) && destination.category === 'Wildlife & Nature';
     return true;
   };
-  const scoped = available.filter(inFocus);
+  const scoped = available.filter((destination) => inFocus(destination) || destination.id === preferences.destinationId);
   const scopePool = scoped.length ? scoped : available;
   const preferred = scopePool.find((destination) => destination.id === preferences.destinationId);
   const ranked = scopePool.map((destination) => {
@@ -61,10 +61,22 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
       return distanceKm(anchor, a.destination) - distanceKm(anchor, b.destination) || b.score - a.score;
     })
     .map(({ destination }) => destination);
-  const ordered = nearby.length ? nearby : [anchor];
+  const nearbyIds = new Set(nearby.map((destination) => destination.id));
+  const farther = ranked.filter(({ destination }) => !nearbyIds.has(destination.id))
+    .sort((a, b) => distanceKm(anchor, a.destination) - distanceKm(anchor, b.destination))
+    .map(({ destination }) => destination);
+  const ordered = [...(nearby.length ? nearby : [anchor]), ...farther];
+  const used = new Set<string>();
   const pick = (day: number) => {
-    if (day === 0 || ordered.length === 1) return ordered[0];
-    return ordered[1 + (day - 1 + seed) % (ordered.length - 1)];
+    if (day === 0 || ordered.length === 1) {
+      used.add(ordered[0].id);
+      return ordered[0];
+    }
+    const candidates = ordered.filter((destination) => !used.has(destination.id));
+    if (!candidates.length) return ordered[(day + seed) % ordered.length];
+    const choice = candidates[(day - 1 + seed) % Math.min(candidates.length, 3)];
+    used.add(choice.id);
+    return choice;
   };
 
   return Array.from({ length: count }, (_, index) => {
