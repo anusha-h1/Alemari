@@ -69,21 +69,11 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
   const alternatives = [...(nearby.length ? nearby : [anchor]).filter((destination) => destination.id !== anchor.id), ...localAlternatives];
   const offset = alternatives.length ? seed % alternatives.length : 0;
   const ordered = [anchor, ...alternatives.slice(offset), ...alternatives.slice(0, offset)];
-  const used = new Set<string>();
-  const pick = (day: number) => {
-    if (day === 0 || ordered.length === 1) {
-      used.add(ordered[0].id);
-      return ordered[0];
-    }
-    const candidates = ordered.filter((destination) => !used.has(destination.id));
-    if (!candidates.length) return ordered[(day + seed) % ordered.length];
-    const choice = candidates[0];
-    used.add(choice.id);
-    return choice;
-  };
+  // Never invent a long-distance transfer or repeat a stop just to fill the
+  // requested number of days. A shorter route is safer than a misleading one.
+  const route = ordered.filter((destination, index) => ordered.findIndex((item) => item.id === destination.id) === index).slice(0, count);
 
-  return Array.from({ length: count }, (_, index) => {
-    const destination = pick(index);
+  return route.map((destination, index) => {
     const dayScale = preferences.pace === 'Relaxed' ? 0.82 : preferences.pace === 'Adventure-packed' ? 1.2 : 1;
     const budgetFactor = preferences.style === 'Premium' ? 1.8 : preferences.style === 'Moderate' ? 1.2 : 0.72;
     const travellerCount = Math.max(1, preferences.travellers);

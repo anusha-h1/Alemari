@@ -185,9 +185,11 @@ def generate_itinerary(request: ItineraryRequest):
     if len(route) > 2:
         offset = request.seed % (len(route) - 1)
         route = [route[0], *route[1 + offset:], *route[1:1 + offset]]
+    # Do not repeat a destination when the local route has fewer stops than
+    # the requested days. Returning a shorter itinerary is more useful than
+    # silently suggesting duplicate days or an out-of-area transfer.
     days = []
-    for index in range(request.availableDays):
-        place = route[index] if index < len(route) else route[index % len(route)]
+    for index, place in enumerate(route[:request.availableDays]):
         daily = min(request.budget // request.availableDays, round(((place["budgetMin"] + place["budgetMax"]) / 2 / max(place["days"], 1)) * request.travellers))
         travel, food = int(daily * .3), int(daily * .25)
         highlights = place["highlights"]

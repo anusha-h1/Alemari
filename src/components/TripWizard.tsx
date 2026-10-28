@@ -172,7 +172,8 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
       </motion.div>}
 
       {step === 3 && <motion.div className="planner-step itinerary-step" key="step-four" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -14 }}>
-        <span className="eyebrow">04 / YOUR LOCAL ITINERARY</span><h3>A journey, shaped around you.</h3><p>{preferences.availableDays} days · {preferences.travellers} traveller{preferences.travellers === 1 ? '' : 's'} · {preferences.interests.length ? preferences.interests.slice(0, 2).join(' & ') : 'A little of everything'}</p>
+        <span className="eyebrow">04 / YOUR LOCAL ITINERARY</span><h3>A journey, shaped around you.</h3><p>{days.length} days · {preferences.travellers} traveller{preferences.travellers === 1 ? '' : 's'} · {preferences.interests.length ? preferences.interests.slice(0, 2).join(' & ') : 'A little of everything'}</p>
+        {days.length < preferences.availableDays && <p className="planner-constraint-notice" role="status">We found {days.length} unique places within this local route for your {preferences.availableDays}-day request. Add another nearby destination or choose a broader starting area to extend it.</p>}
         <div className="estimate-banner"><span><Wallet size={18} /> Estimated total, approximate</span><strong>₹{total.toLocaleString('en-IN')}</strong><small>Local planning estimate only — no live pricing or availability is connected.</small></div>
         <div className="itinerary-days">{days.map((day) => {
           const place = destinations.find((destination) => destination.id === day.destinationIds[0]);
