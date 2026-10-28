@@ -1,6 +1,21 @@
 import { destinations } from '../data/destinations';
 import type { ItineraryDay, PlannerPreferences, SavedTrip } from '../types';
 
+const startCityCoordinates: Record<string, [number, number]> = {
+  bengaluru: [12.9716, 77.5946], bangalore: [12.9716, 77.5946], mysuru: [12.2958, 76.6394], mysore: [12.2958, 76.6394],
+  gadag: [15.429, 75.63], hubballi: [15.3647, 75.124], hubli: [15.3647, 75.124], dharwad: [15.4589, 75.0078],
+  mangaluru: [12.9141, 74.856], mangalore: [12.9141, 74.856], udupi: [13.3409, 74.7421], ballari: [15.1394, 76.9214],
+  hampi: [15.335, 76.46], chikmagaluru: [13.3161, 75.772], chikkamagaluru: [13.3161, 75.772],
+};
+
+function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const radians = (degrees: number) => degrees * Math.PI / 180;
+  const dLat = radians(b.lat - a.lat);
+  const dLng = radians(b.lng - a.lng);
+  const value = Math.sin(dLat / 2) ** 2 + Math.cos(radians(a.lat)) * Math.cos(radians(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
 export function buildItinerary(preferences: PlannerPreferences, seed = 0): ItineraryDay[] {
   const count = Math.max(1, Math.min(10, Math.round(preferences.availableDays || 1)));
   const available = [...destinations];
@@ -26,18 +41,30 @@ export function buildItinerary(preferences: PlannerPreferences, seed = 0): Itine
     return { destination, score: Number(destination.id === preferred?.id) * 10 + familyBonus + Number(interestMatch) * 3 + Number(shared) * 2 + Number(budgetMatch) };
   }).sort((a, b) => b.score - a.score || a.destination.name.localeCompare(b.destination.name));
 
-  const alternatives = ranked.filter((entry) => !preferences.destinationId || entry.destination.id !== preferred?.id);
-  const ordered = preferred ? [preferred, ...alternatives.map((entry) => entry.destination)] : alternatives.map((entry) => entry.destination);
-  const used = new Set<string>();
+  // Keep each itinerary around one anchor. The selected destination wins; otherwise
+  // prefer a strong match close to the traveller's stated starting city.
+  const normalizedCity = preferences.startingCity.trim().toLowerCase();
+  const cityCoordinates = startCityCoordinates[normalizedCity];
+  const startingPoint = cityCoordinates ? { lat: cityCoordinates[0], lng: cityCoordinates[1] } : undefined;
+  const localCandidates = startingPoint ? ranked.filter(({ destination }) => distanceKm(startingPoint, destination) <= 150) : [];
+  const anchorCandidates = localCandidates.length ? localCandidates : ranked;
+  const anchor = preferred ?? [...anchorCandidates].sort((a, b) => {
+    const aDistance = startingPoint ? distanceKm(startingPoint, a.destination) : 0;
+    const bDistance = startingPoint ? distanceKm(startingPoint, b.destination) : 0;
+    return (b.score - bDistance / 30) - (a.score - aDistance / 30);
+  })[0]?.destination ?? scopePool[0];
+  const nearby = ranked
+    .filter(({ destination }) => destination.id === anchor.id || distanceKm(anchor, destination) <= 100)
+    .sort((a, b) => {
+      if (a.destination.id === anchor.id) return -1;
+      if (b.destination.id === anchor.id) return 1;
+      return distanceKm(anchor, a.destination) - distanceKm(anchor, b.destination) || b.score - a.score;
+    })
+    .map(({ destination }) => destination);
+  const ordered = nearby.length ? nearby : [anchor];
   const pick = (day: number) => {
-    const candidates = ordered.filter((destination) => !used.has(destination.id));
-    if (candidates.length === 0) {
-      const next = ordered[(day + seed) % ordered.length];
-      return next;
-    }
-    const destination = candidates[(day + seed) % Math.min(candidates.length, Math.max(1, Math.min(3, candidates.length)))];
-    used.add(destination.id);
-    return destination;
+    if (day === 0 || ordered.length === 1) return ordered[0];
+    return ordered[1 + (day - 1 + seed) % (ordered.length - 1)];
   };
 
   return Array.from({ length: count }, (_, index) => {

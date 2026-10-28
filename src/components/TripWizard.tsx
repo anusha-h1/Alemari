@@ -99,8 +99,8 @@ export function TripWizard({ open, initialDestinationId, initialPreferences, onC
         return interestMatch && destination.days <= preferences.availableDays && destination.budgetMin <= preferences.budget;
       });
       if (matches.length) {
-        patch('destinationId', matches[seed % matches.length].id);
-        setDestinationNotice('');
+        patch('destinationId', 'surprise');
+        setDestinationNotice('We’ll choose a matching place near your starting city and keep the other days close by.');
       } else {
         patch('destinationId', 'surprise');
         setDestinationNotice('No single destination in this local sample matches every selected interest, day limit, and budget. We’ll build a broader itinerary within your days and budget; change your choices if you want a tighter match.');
